@@ -1,0 +1,358 @@
+06-03-2017
+----------
+
+1.Create a git repo and upload
+
+
+git init 
+
+create remote repository
+git remote 
+
+
+
+in jenkins create a job which downloads latest cookbooks from git upload this to the chef server and trigger 
+chf clients on the nodes
+
+
+knife cookbook upload --cookbook-path -a
+knife cookbook upload --all
+ 
+
+centos
+
+setting up of knife.rb and .pem file 
+
+we need this in jenkins machine for authenticating to the server
+
+08-03-2017
+----------
+
+Triggering a chef client after uploading cookbooks to the chef sever
+
+Install SSH Plugin
+Using this we can execute a command on remote host
+
+Step2
+	configure remote host under this plugin
+
+configure a job
+
+build:Execute shell script on remote host
+	
+
+rundeck---multiple nodes
+
+
+If we have 3 or 4 nodes managed by chef we can use jenkins for triggering chef-client
+
+If we have more than 50 chef nodes we need to orchestration tools such as rundeck
+
+Managing dedpendencies in chef
+------------------------------
+There are lots of community cookbooks available in chef-super market
+In our cookbook we can use community cookbook available in chef supermarket by adding a dependency by adding our cookbook
+Our cookbook is wrapping the community cookbook
+
+Community cookbook might be depending on lots of other cookbooks
+Managing all these dependencies all manually is a hectic process
+To solve this problem we have dependency management tool burkshelf
+Using community cookbook in our wrapper cookbook.
+
+
+cookbook> berks init
+check for berksfile in cookboot if missing run berks init
+
+source "https://supermarket.chef.io"
+cookbook 'java', '~>1.47.0'
+
+>berks install 
+
+Will downloads dependecy to
+
+~/.berkshelf/cookbooks/
+
+In default.rb
+
+include_recipe 'java::default'
+
+Note:: We can include a recipe in another recipe by include_recipe 'rname::default-nh'
+
+>berks upload
+
+test kitchen(for local)
+
+It is a tool used for testing our cookbooks in the local machine
+
+*which integration testing tool is used for testing chef cookbooks.
+A. test kitchen
+
+.kitchen.yml
+
+>kitchen converge
+
+
+Berksfile
+		metadata
+Metadata	
+		depends 'java', '~> 1.47.0'
+
+>kitchen converge
+
+Checking test
+>kitchen login
+
+chef has unit testing framework--serverspec
+
+13-03-17
+--------
+
+*Attributes in chef
+
+Attribute: node specific data
+
+ohai
+	It is a piece of software which collects os specific and hardware specific attributes
+	It is also installed when we bootstrap a node
+	The attributes collected by ohai we call them as automatic attributes and cannot be modified
+
+*Types of attributes in chef:
+
+default
+force_default
+normal
+override
+force_override
+automatic
+
+Attribute sources
+
+Nodes
+attribute files
+recipes
+environments
+roles
+
+default.rb
+		package_name=''
+
+		case node['platform']
+		when 'centos'
+			package_name='httpd'
+		else
+			package_name='apache2'
+		end
+		
+		package package_name do
+		action:install
+		end
+
+		service package_name do
+		action[:start,:enable]
+		end
+
+
+Other than automatic remaining are custom attributes
+
+Default Attributes
+------------------
+
+attributes	
+		default.rb
+			default['eveningcookbook']['apache']['version'] ='2.4.25' ------same as node.default['eveningcookbook']['apache']['version'] ='2.4.25'
+
+recipe	
+		default.rb
+			package package_name do
+			action:install
+			version node['eveningcookbook']['apache']['version']
+			end
+attributes	
+		default.rb
+			default['eveningcookbook']['company'] ='default'
+			force_default['eveningcookbook']['company'] ='force'
+recipe	
+		default.rb
+			Chef::Log.info(node['eveningcookbook']['company'])
+
+Priority
+
+			 attributefiles	   node/recipe	  environment  role
+
+default				1		2		3	4
+force_default			5		6
+normal				7		8
+override			9		10		12	11
+force_override			13		14
+automatic		------------------------15---------------------------	
+
+
+Note:
+
+Attribute file name can be anything we can also have multiple files
+
+While using attribute in recipe we have to  use 
+node.default['eveningcookbook']['company']
+
+DataBags:
+--------
+
+It is global variable and not node specific					
+
+step1:
+	create data_bags(folder) under chefrepo
+step2:
+	create users folder under data_bags
+step3:
+	tomcat-users.json,db-users.json
+	
+		chef-repo
+			cookbooks
+			data_bags
+				users
+					db-users.json
+					tomcat-users.json
+							{
+								"id":"tomcat-user",
+								"user1":"javahome1",
+								"password1":"javahome123",	
+								"user2":"javahome2",
+								"password2":"javahome456"
+							}
+
+rhere users(folder) is databag 
+and tomcat-users.json,db-users.json(files) are databag items
+    
+Id is mandatory in json file
+
+chef-repo>knife data bag create users
+
+chef-repo>knife data bag from file users tomcat-users.json
+
+chef-repo>knife data bag show users
+
+Using data bag in recipes
+-------------------------
+
+
+14-03-2017
+----------
+
+
+Encrypted data bags
+-------------------
+
+Data bags support data encryption.
+IF we want to store any sensitive information we can store using encrypted data bags
+
+generate key 
+>knife data bag create data_bag bag_item --secret-file /,,/jiji/bag_key
+
+>knife data bag show data_bag bag_item
+
+chef nodes can access data from encrypted data bags so node must have the key to decrypt the encrypted data
+
+To load the secret from file
+
+data_bag_item('bag','item',IO.read('secret_file'))
+
+If we do not pass secret file information it checks for /etc/chef/encrypted_data_bag_secret
+
+interview:
+Difference b/w attribures and databags
+
+Environment in CHef
+---------------------
+
+*We have tomcat cookbook in development we want to use dev 0.0.5 in prod 0.0.4
+using environment
+
+name 'dev'
+description 'dev'
+cookbook 'tomcat' '=0.0.5'
+
+
+name 'prod'
+description 'prod'
+cookbook 'tomcat' '=0.0.4'
+
+Roles
+-----
+In a infrastructure we see group of servers do same job
+ex web servers, database servers,nagios monitoring servers
+
+We can create role from command prompt or chef server console
+
+name "webservers"
+description "webservers"
+run_list "recipe[tomcat]"
+env_run_lists "dev"
+
+*we want to use a different runlist in dev and diff runlist in prod 
+This can be achieve using roles
+
+name "webservers"
+description "webservers"
+run_list "recipe[tomcat]"
+env_run_lists "dev" => ["role[tomcat]", "role[mysql]:], "prod" => ["role[tomcat]"]
+
+Files in Chef
+-------------
+
+files
+	default
+			myfile.cfg
+				jfhfhjdshhjkdshh]	
+				oijidhcdchjcjchb
+				kjdshvjhd
+				jkhjdshsjk
+recipe
+	default.rb
+			cookbook_file '/tmp/javahome.cfg' do
+			source 'myfile.cfg'---------------------------This file is located from /cookbooks/files/default/
+			end
+
+cookbook files suports static content
+
+Templates
+---------
+
+Deals with dynamic files
+We can embed ruby code into templates
+
+templates
+	default
+			tomcat.erb
+				This is static area
+				<%
+				for i in 1..10
+				puts i
+				end
+				
+				tomcat_port=8080
+				if node['platform']=='centos'
+				tomcat_port=2424
+				end
+
+				%>
+
+recipe
+	default.rb
+			cookbook_file '/tmp/javahome.cfg' do
+			source 'myfile.cfg'---------------------------This file is located from /cookbooks/files/default/
+			end
+
+			template '/opt/tomcat' do
+			source 'tomcat.erb'---------------------------This embeded ruby file is located from /cookbooks/templates/default/
+			end
+
+Diff file and template
+file supports static content
+template supporta Static as well as dynamic content
+
+require 'chef/knife'
+count=0
+File.readlines('Newfile.txt').each  do |line|
+count+=1
+Chef::Knife.run(%w(bootstrap -N chef-#{count} --sudo 
+end
