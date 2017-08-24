@@ -356,3 +356,367 @@ File.readlines('Newfile.txt').each  do |line|
 count+=1
 Chef::Knife.run(%w(bootstrap -N chef-#{count} --sudo 
 end
+
+
+
+
+
+22/02/2017
+
+Tomcat manager applicaion:
+	This is a web application comes along with tomcat.using this we can manage web applications running on tomcat.
+-by default tomcat manager application is disabled,in order to enable this we need to change couple of configuration files.
+1)add users and roles in tomat home/conf/tomcat-users.xml
+2)remove the following content in tomcathome/webapps/manager/META-INF/context.xml
+ remove the content b/n <context> </context>
+3)configure the job in jenkins which deploys the war file to the remote tomcat container.
+4)add deploy to a container plugin in jenkins
+
+What is master slave in jenkins:
+	we install a jenkins server the server to handle more load we may need add slaves.
+Note:master slave is configured in order to handle more load.
+
+23/02/2017
+
+Master:the Machine on which we install jenkins is called as master.
+	-to this master we can add more slaves.
+	jenkins installed-->slave-1,slave-2,slave-3
+	-master slave works like this.
+	1)if master is busy running certain jobs and if there are new jobs submitted master sends those jobs to one of the slave machine.
+     ***2)we also an configure jobs to execute on a particular slave machine.
+NOTE:slave machine must have the environment similar to master,i.e in our case jenkins master have jdk,git,maven,we need this things on the slave as well.
+
+Adding a slave to the master:
+
+Interview question:	
+how to configure a job to run only on a slave machine?
+cofigure a job under general section check restrict where this project can be run.
+
+changing the port number of  tomcat:
+	modify tomcat home /conf/server.xml check for connector port HTTP/1.1.
+
+CHEF:
+	chef is configuration management tool.using chef we can automate installation nd configuration 
+of s/w packages.
+-->for example we have 250 servers in the production environment and on 250 servers we want to install nd 
+   configure jdk nd tomcat.
+-->if we choose manual approach its time taking and we won't see the consistence output.
+-->we can use chef for deployments as well.lets say there is a new release nd we want deploy this code on 250 servers
+   we can use chef.
+The basics of chef:
+	1)cookbook-it is nothing but collection of recipes.
+	2)Recipe- it is colllection of resources.
+	3)Resource-it does a particular task,
+              for example creating a file,file resource.
+			  creating a directory
+		 	  package resource	
+for example we want to install and configure tomcat using chef,then we create tomcat cookbook.
+****
+chef architecture:
+	chef workstation--is the machine on which we develop the chef.(it is a laptop owned by devops)
+	chef server--its a machine on which chef server is installed and cookbooks are stored.
+	Node-its a machine which is configured with the help of chef cookbooks.
+
+02/03/2017
+
+Ruby:
+
+PS C:\Windows\system32> irb
+irb(main):001:0> puts 'welcome to ruby'
+welcome to ruby
+=> nil
+irb(main):002:0> puts('welcome to ruby')
+welcome to ruby
+=> nil
+irb(main):003:0> puts('AWS','Devops')
+AWS
+Devops
+=> nil
+irb(main):004:0> puts 'AWS','Devops'
+AWS
+Devops
+=> nil
+irb(main):005:0> i=10
+=> 10
+irb(main):006:0> j=20
+=> 20
+irb(main):007:0> i+j
+=> 30
+irb(main):008:0> 10+20
+=> 30
+irb(main):009:0> 10-20
+=> -10
+irb(main):010:0> 10*20
+=> 200
+irb(main):011:0> 10%20
+=> 10
+irb(main):012:0> 10/20
+=> 0
+
+
+
+
+data types in ruby:
+
+'chef'.class
+=>String
+10.class
+=>Fixmum
+10.5.class
+=>Float
+true.class
+=>TrueClass
+false.class
+=>FalseClass
+marks=[80,90,95,88,79]
+=>[80,90,95,88,79]
+marks.class
+=>Array
+marks[0]
+=>80
+marks[4]
+=> nil
+marks.length
+=>4
+
+
+file '/var/welcome.txt' do
+	content 'Addes by chef'
+	action: create
+end
+
+
+open notepad++
+write a simple program
+
+i=10
+j=20
+result=i+j
+puts=result
+
+
+
+save the file a.rb
+
+open command prompt 
+go to that location
+give ruby a.rb
+
+i=10
+j=20
+result=i+j
+puts"addition of #{i} & #{j}
+
+
+#defining add method
+def add(i,j)
+ result = i+j
+ puts result
+end
+#calling add method
+add 10,20
+add(25,15)
+end
+
+#print all the values in the array
+courses=['AWS',Devops',Java','Angularjs']
+
+courses.each do |course|
+   puts course
+end
+
+ruby b.rb
+o/P:
+AWS
+Devops
+java
+Angularjs
+
+
+courses=[:AWS,:Devops,:Java,:Angularjs]
+
+for course in courses
+    puts course
+end
+
+o/p is same
+
+
+(1..20).each do |x|
+    puts x
+end
+
+o/p: 1,2,3,4.....20
+
+(1...20).each do |x|
+    puts x
+end
+
+o/p:1,2,3,4....19
+
+
+(1...20).each do |x|
+   if x%2 ==0
+    puts x
+ end  #end of if
+end  #end of for loop
+
+
+
+
+x=20
+y=100
+
+#write a code to find greatest of two numbers
+
+if x>y
+   puts "#{x} is gratest values"
+else
+   puts "#{y} is gratest values"
+end
+
+o/p: 100 is gratest values
+
+
+
+x=100
+y=1000
+
+#write a code to find greatest of two numbers
+
+if x>y
+   puts "#{x} is gratest values"
+else if y>x
+   puts "#{y} is gratest values"
+else
+   puts "#{x} & {y} re equal
+end
+
+o/p:100 is gratest value
+
+case when then:
+
+case 20
+
+when 10 then
+   puts "Ten"
+when 20 then
+   puts"Twenty"
+when 30 then
+   puts"Thirty"
+else
+   puts "No matching"
+end
+
+o/p:20
+
+while loop:
+
+x=1
+while x<=10
+  puts x
+  x=x+1
+end
+
+o/p:1 2 3 ....10
+
+
+03/03/2017
+
+Hash:
+
+course=['java','AWS','Devops']
+
+#Hash data structure contains key and value
+
+c = {'java'=>10000,'Devops=>15000,'Angularjs'=>8000}
+
+puts c['java']
+
+puts "Cost of Devops is #{c['Devops']}"
+
+#Adding key & value to the Hash
+
+c['AWS']=15000
+
+puts c['AWS']
+
+c['AWS']=12000
+
+puts c['AWS']
+
+#i want to print only the key names
+
+course=['java','AWS','Devops']
+
+#Hash data structure contains key and value
+
+c = {'java'=>10000,'Devops=>15000,'Angularjs'=>8000}
+
+c.each_key do |k|
+    puts "Course Name #{k}"
+end
+
+
+#i want to print course name nd cost of the fee
+
+course=['java','AWS','Devops']
+
+#Hash data structure contains key and value
+
+c = {'java'=>10000,'Devops=>15000,'Angularjs'=>8000}
+
+c.each_key do |k|
+    puts "Course Name #{k} & Its cost is #{c[k]}"
+end
+
+Examples:
+
+1)write a ruby code to find some of elements in the array--for loop
+2)write a ruby code to print only prime numbers b/n 1 and 15
+3)write a ruby method which finds a square of number 
+4)write a ruby code to print all the values in the Hash
+5)write a ruby code to find greatest of two numbers
+6)use case when then,write a code whih takes a single digit fix number and prints the text form of number
+
+c= {:java=>10000, :Devops=>15000, :Angularjs=>8000}
+
+c= {java:10000,Devops:15000,Angularjs:8000}
+
+c = Hash.new or c =Hash::new
+#Adding key & values to the hash
+c[:java]=9000
+c[:Angular]=8000
+#Accessing keys from the hash
+c.each_key do |a|
+   puts a
+end
+
+o/p:java
+    Angular	
+
+file '/users/kammana/javahome1234.sh' do ---syntax of chef
+end
+
+if !file.exist?('/users/kammana/javahome1234.sh')
+   file.new('/users/kammana/javahome1234.sh','w')
+end
+
+Interview question
+what is Idempotent?
+
+
+output = `ls -ltr`
+    puts output
+
+system "mkdir", "/users/kammana/rubydemo"
+
+1)create myfile cookbook,this cookbook should create a file learning chef.sh and the content in this 
+file should be chef is amazing tool.
+2)assign vagrant user and group,the path of the file should be /opt
+
+
+
+
+
+	
